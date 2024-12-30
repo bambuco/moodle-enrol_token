@@ -173,7 +173,7 @@ class token extends base {
             ->add_joins($this->get_joins())
             ->add_fields("$tokenalias.timecreated")
             ->set_type(column::TYPE_TIMESTAMP)
-            ->set_is_sortable(false)
+            ->set_is_sortable(true)
             ->set_callback(static function(?int $timecreated): string {
                 return userdate($timecreated, get_string('strftimedatetimeshortaccurate', 'langconfig'));
             });
@@ -186,7 +186,7 @@ class token extends base {
             ->add_joins($this->get_joins())
             ->add_fields("$tokenalias.timeused")
             ->set_type(column::TYPE_TIMESTAMP)
-            ->set_is_sortable(false)
+            ->set_is_sortable(true)
             ->set_callback(static function(?int $timeused): string {
                 if (empty($timeused)) {
                     return '';

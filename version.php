@@ -24,6 +24,6 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-$plugin->version   = 2024122200.02;
+$plugin->version   = 2024122201;
 $plugin->requires  = 2023100400;
 $plugin->component = 'enrol_token';
