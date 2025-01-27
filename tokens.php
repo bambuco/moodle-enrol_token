@@ -60,6 +60,16 @@ if ($delete && confirm_sesskey()) {
     }
 }
 
+if ($amount) {
+    if ($amount >= 1 && $amount <= 100) {
+        $enroltoken->generate_tokens($instance, $amount);
+        redirect($url, get_string('tokensgenerated', 'enrol_token', $amount), null, \core\output\notification::NOTIFY_SUCCESS);
+    } else {
+        redirect($url, get_string('invalidamount', 'enrol_token'), null, \core\output\notification::NOTIFY_ERROR);
+    }
+    exit;
+}
+
 $PAGE->set_url($url);
 $PAGE->set_pagelayout('admin');
 $PAGE->set_title($title);
@@ -69,15 +79,6 @@ $PAGE->navbar->add($title, $url);
 
 echo $OUTPUT->header();
 echo $OUTPUT->heading($title);
-
-if ($amount) {
-    if ($amount >= 1 && $amount <= 100) {
-        $enroltoken->generate_tokens($instance, $amount);
-        echo $OUTPUT->notification(get_string('tokensgenerated', 'enrol_token', $amount), \core\output\notification::NOTIFY_SUCCESS);
-    } else {
-        echo $OUTPUT->notification(get_string('invalidamount', 'enrol_token'), \core\output\notification::NOTIFY_ERROR);
-    }
-}
 
 // List the tokens.
 $report = system_report_factory::create(\enrol_token\systemreports\tokens::class,
