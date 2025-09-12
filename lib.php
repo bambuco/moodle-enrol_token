@@ -148,15 +148,15 @@ class enrol_token_plugin extends enrol_plugin {
      * Self enrol user to course
      *
      * @param stdClass $instance enrolment instance
-     * @param stdClass $data data needed for enrolment.
-     * @return bool|array true if enroled else eddor code and messege
+     * @param stdClass $data data needed for enrolment
+     * @return bool true if enroled else false
      */
     public function enrol_self(stdClass $instance, $data = null) {
         global $USER, $DB;
 
         // Don't enrol user if token is not passed.
         if (!isset($data->enroltoken)) {
-            return;
+            return false;
         }
 
         $conditions = [
@@ -193,6 +193,8 @@ class enrol_token_plugin extends enrol_plugin {
         if ($instance->customint4 != ENROL_DO_NOT_SEND_EMAIL) {
             $this->email_welcome_message($instance, $USER);
         }
+
+        return true;
     }
 
     /**

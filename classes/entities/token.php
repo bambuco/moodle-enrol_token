@@ -47,10 +47,10 @@ class token extends base {
      *
      * @return array
      */
-    protected function get_default_table_aliases(): array {
+    protected function get_default_tables(): array {
         return [
-            'enrol_token_tokens' => 'ett',
-            'user' => 'u',
+            'enrol_token_tokens',
+            'user',
         ];
     }
 
