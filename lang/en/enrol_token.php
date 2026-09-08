@@ -22,6 +22,8 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+$string['addgroup'] = 'Add to group';
+$string['addgroup_help'] = 'If a group is selected, users will be added to that group when they enrol with a valid token. If no group is selected, enrolment works as usual. Changing this setting has no effect on existing enrolments.';
 $string['canntenrol'] = 'Enrolment is disabled or inactive';
 $string['canntenrolearly'] = 'You cannot enrol yet; enrolment starts on {$a}.';
 $string['canntenrollate'] = 'You cannot enrol any more, since enrolment ended on {$a}.';

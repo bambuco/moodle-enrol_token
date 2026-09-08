@@ -22,6 +22,8 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+$string['addgroup'] = 'Añadir al grupo';
+$string['addgroup_help'] = 'Si se selecciona un grupo, los usuarios se añadirán a ese grupo al inscribirse con un token válido. Si no se selecciona un grupo, la inscripción funciona como de costumbre. Cambiar esta configuración no afecta a las inscripciones existentes.';
 $string['canntenrol'] = 'La inscripción está deshabilitada o inactiva';
 $string['canntenrolearly'] = 'No puedes inscribirte aún; la inscripción comienza el {$a}.';
 $string['canntenrollate'] = 'Ya no puedes inscribirte, ya que la inscripción finalizó el {$a}.';

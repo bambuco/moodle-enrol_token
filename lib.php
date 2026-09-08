@@ -152,7 +152,7 @@ class enrol_token_plugin extends enrol_plugin {
      * @return bool true if enroled else false
      */
     public function enrol_self(stdClass $instance, $data = null) {
-        global $USER, $DB;
+        global $CFG, $USER, $DB;
 
         // Don't enrol user if token is not passed.
         if (!isset($data->enroltoken)) {
@@ -178,6 +178,16 @@ class enrol_token_plugin extends enrol_plugin {
         }
 
         $this->enrol_user($instance, $USER->id, $instance->roleid, $timestart, $timeend);
+
+        if (!empty($instance->customint1)) {
+            require_once($CFG->dirroot . '/group/lib.php');
+            if ($DB->record_exists('groups', [
+                'id' => $instance->customint1,
+                'courseid' => $instance->courseid,
+            ])) {
+                groups_add_member($instance->customint1, $USER->id);
+            }
+        }
 
         $validtoken = reset($validtokens);
         $updatedata = [
@@ -256,7 +266,7 @@ class enrol_token_plugin extends enrol_plugin {
                 return get_string('noguestaccess', 'enrol') . $OUTPUT->continue_button(get_login_url());
             }
             // Check if user is already enroled.
-            if ($DB->get_record('user_enrolments', array('userid' => $USER->id, 'enrolid' => $instance->id))) {
+            if ($DB->get_record('user_enrolments', ['userid' => $USER->id, 'enrolid' => $instance->id])) {
                 return get_string('canntenrol', 'enrol_token');
             }
         }
@@ -405,7 +415,7 @@ class enrol_token_plugin extends enrol_plugin {
             $notifyall = 0;
         }
 
-        $fields = array();
+        $fields = [];
         $fields['status']          = $this->get_config('status');
         $fields['roleid']          = $this->get_config('roleid');
         $fields['enrolperiod']     = $this->get_config('enrolperiod');
@@ -726,6 +736,24 @@ class enrol_token_plugin extends enrol_plugin {
     }
 
     /**
+     * Return an array of valid options for the group assignment.
+     *
+     * @param context $coursecontext
+     * @param stdClass $instance
+     * @return array
+     */
+    protected function get_group_options($coursecontext, $instance) {
+        $groups = [0 => get_string('none')];
+        foreach (groups_get_all_groups($coursecontext->instanceid) as $group) {
+            $groups[$group->id] = format_string($group->name, true, ['context' => $coursecontext]);
+        }
+        if (!empty($instance->customint1) && !isset($groups[$instance->customint1])) {
+            $groups[$instance->customint1] = get_string('unknowngroup', 'error', $instance->customint1);
+        }
+        return $groups;
+    }
+
+    /**
      * The token enrollment plugin has several bulk operations that can be performed.
      * @param course_enrolment_manager $manager
      * @return array
@@ -777,6 +805,16 @@ class enrol_token_plugin extends enrol_plugin {
 
         $roles = $this->extend_assignable_roles($context, $instance->roleid);
         $mform->addElement('select', 'roleid', get_string('role', 'enrol_token'), $roles);
+
+        $groups = $this->get_group_options($context, $instance);
+        if (count($groups) > 1) {
+            $mform->addElement('select', 'customint1', get_string('addgroup', 'enrol_token'), $groups);
+            $mform->addHelpButton('customint1', 'addgroup', 'enrol_token');
+        } else {
+            $mform->addElement('hidden', 'customint1');
+            $mform->setType('customint1', PARAM_INT);
+            $mform->setConstant('customint1', 0);
+        }
 
         $options = ['optional' => true, 'defaultunit' => 86400];
         $mform->addElement('duration', 'enrolperiod', get_string('enrolperiod', 'enrol_token'), $options);
@@ -846,7 +884,7 @@ class enrol_token_plugin extends enrol_plugin {
                 enrol_send_welcome_email_options());
         $mform->addHelpButton('customint4', 'sendcoursewelcomemessage', 'enrol_token');
 
-        $options = array('cols' => '60', 'rows' => '8');
+        $options = ['cols' => '60', 'rows' => '8'];
         $mform->addElement('textarea', 'customtext1', get_string('customwelcomemessage', 'enrol_token'), $options);
         $mform->addHelpButton('customtext1', 'customwelcomemessage', 'enrol_token');
 
@@ -903,10 +941,12 @@ class enrol_token_plugin extends enrol_plugin {
         $validroles = array_keys($this->extend_assignable_roles($context, $instance->roleid));
         $validexpirynotify = array_keys($this->get_expirynotify_options());
         $validlongtimenosee = array_keys($this->get_longtimenosee_options());
-        $tovalidate = array(
+        $validgroups = array_keys($this->get_group_options($context, $instance));
+        $tovalidate = [
             'enrolstartdate' => PARAM_INT,
             'enrolenddate' => PARAM_INT,
             'name' => PARAM_TEXT,
+            'customint1' => $validgroups,
             'customint2' => $validlongtimenosee,
             'customint3' => PARAM_INT,
             'customint4' => PARAM_INT,
@@ -916,7 +956,7 @@ class enrol_token_plugin extends enrol_plugin {
             'enrolperiod' => PARAM_INT,
             'expirynotify' => $validexpirynotify,
             'roleid' => $validroles
-        );
+        ];
         if ($data['expirynotify'] != 0) {
             $tovalidate['expirythreshold'] = PARAM_INT;
         }

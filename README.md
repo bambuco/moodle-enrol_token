@@ -38,6 +38,9 @@ to complete the installation from the command line.
 * **Powered by:** [BambuCo](https://bambuco.co/) - [Universidad CES](https://www.ces.edu.co/)
 
 ## In version
+### 2024122202:
+* Add student to group in enrolment.
+
 ### 2024122201:
 * First version.
 
