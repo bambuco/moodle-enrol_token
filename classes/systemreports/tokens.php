@@ -24,14 +24,16 @@
 
 namespace enrol_token\systemreports;
 
-// We need to include the lib file because it is not included in AJAX calls.
-require_once($CFG->dirroot . '/enrol/token/lib.php');
-
 use enrol_token\entities\token;
 use core_reportbuilder\local\helpers\database;
 use core_reportbuilder\system_report;
 use core_reportbuilder\local\report\action;
 use stdClass;
+
+defined('MOODLE_INTERNAL') || die();
+
+// We need to include the lib file because it is not included in AJAX calls.
+require_once($CFG->dirroot . '/enrol/token/lib.php');
 
 /**
  * Class tokens
@@ -41,9 +43,10 @@ use stdClass;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class tokens extends system_report {
-
     /**
-     * Initialise report, we need to set the main table, load our entities and set columns/filters
+     * Initialise report, we need to set the main table, load our entities and set columns/filters.
+     *
+     * @return void
      */
     protected function initialise(): void {
         global $PAGE;
@@ -82,12 +85,14 @@ class tokens extends system_report {
         $this->add_base_fields("{$entitymainalias}.id");
 
         $actiondelete = new action(
-            new \moodle_url('/enrol/token/tokens.php', [
-                                    'enrolid' => $enrolid,
-                                    'delete' => ':id',
-                                    'sesskey' => sesskey(),
-                                ]
-                            ),
+            new \moodle_url(
+                '/enrol/token/tokens.php',
+                [
+                    'enrolid' => $enrolid,
+                    'delete' => ':id',
+                    'sesskey' => sesskey(),
+                ]
+            ),
             new \pix_icon('i/trash', ''),
             [],
             false,
@@ -123,6 +128,8 @@ class tokens extends system_report {
      *
      * They are all provided by the entities we previously added in the {@see initialise} method, referencing each by their
      * unique identifier
+     *
+     * @return void
      */
     public function add_columns(): void {
         $columns = [
@@ -140,6 +147,8 @@ class tokens extends system_report {
      *
      * They are all provided by the entities we previously added in the {@see initialise} method, referencing each by their
      * unique identifier
+     *
+     * @return void
      */
     protected function add_filters(): void {
         $filters = [

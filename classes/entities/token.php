@@ -41,7 +41,6 @@ use core_reportbuilder\local\filters\date;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class token extends base {
-
     /**
      * Database tables that this entity uses and their default aliases
      *
@@ -69,7 +68,6 @@ class token extends base {
      * @return base
      */
     public function initialise(): base {
-
         $columns = $this->get_all_columns();
 
         foreach ($columns as $column) {
@@ -88,11 +86,11 @@ class token extends base {
 
     /**
      * Add extra columns to report.
+     *
      * @return array
      * @throws \coding_exception
      */
     protected function get_all_columns(): array {
-
         $tokenalias = $this->get_table_alias('enrol_token_tokens');
         $useralias = $this->get_table_alias('user');
 
@@ -137,15 +135,16 @@ class token extends base {
             ->add_fields("$useralias.id, $useralias.firstname, $useralias.lastname")
             ->set_type(column::TYPE_INTEGER)
             ->set_is_sortable(true)
-            ->set_callback(static function(?int $userid, ?object $data): string {
+            ->set_callback(static function (?int $userid, ?object $data): string {
                 if (empty($userid)) {
                     return '';
                 }
 
-                return \html_writer::link(new \moodle_url('/user/view.php',
-                                        ['id' => $userid]),
-                                        $data->firstname . ' ' . $data->lastname,
-                                        ['target' => '_blank']);
+                return \html_writer::link(
+                    new \moodle_url('/user/view.php', ['id' => $userid]),
+                    $data->firstname . ' ' . $data->lastname,
+                    ['target' => '_blank']
+                );
             });
 
         $columns[] = (new column(
@@ -157,7 +156,7 @@ class token extends base {
             ->add_fields("$tokenalias.token, $tokenalias.timeused")
             ->set_type(column::TYPE_TEXT)
             ->set_is_sortable(false)
-            ->set_callback(static function(?string $token, ?object $data): string {
+            ->set_callback(static function (?string $token, ?object $data): string {
                 if (empty($data->timeused)) {
                     return $token;
                 }
@@ -174,7 +173,7 @@ class token extends base {
             ->add_fields("$tokenalias.timecreated")
             ->set_type(column::TYPE_TIMESTAMP)
             ->set_is_sortable(true)
-            ->set_callback(static function(?int $timecreated): string {
+            ->set_callback(static function (?int $timecreated): string {
                 return userdate($timecreated, get_string('strftimedatetimeshortaccurate', 'langconfig'));
             });
 
@@ -187,7 +186,7 @@ class token extends base {
             ->add_fields("$tokenalias.timeused")
             ->set_type(column::TYPE_TIMESTAMP)
             ->set_is_sortable(true)
-            ->set_callback(static function(?int $timeused): string {
+            ->set_callback(static function (?int $timeused): string {
                 if (empty($timeused)) {
                     return '';
                 }
@@ -204,7 +203,6 @@ class token extends base {
      * @return filter[]
      */
     protected function get_all_filters(): array {
-
         $filters = [];
         $tokenalias = $this->get_table_alias('enrol_token_tokens');
 
@@ -228,5 +226,4 @@ class token extends base {
 
         return $filters;
     }
-
 }

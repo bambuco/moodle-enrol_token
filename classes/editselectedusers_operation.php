@@ -22,8 +22,6 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-defined('MOODLE_INTERNAL') || die();
-
 /**
  * A bulk operation for the manual enrolment plugin to edit selected users.
  *
@@ -32,7 +30,6 @@ defined('MOODLE_INTERNAL') || die();
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class enrol_token_editselectedusers_operation extends enrol_bulk_enrolment_operation {
-
     /**
      * Returns the title to display for this bulk operation.
      *
@@ -45,6 +42,8 @@ class enrol_token_editselectedusers_operation extends enrol_bulk_enrolment_opera
     /**
      * Returns the identifier for this bulk operation. This is the key used when the plugin
      * returns an array containing all of the bulk operations it supports.
+     *
+     * @return string
      */
     public function get_identifier() {
         return 'editselectedusers';
@@ -56,6 +55,7 @@ class enrol_token_editselectedusers_operation extends enrol_bulk_enrolment_opera
      * @param course_enrolment_manager $manager
      * @param array $users
      * @param stdClass $properties The data returned by the form.
+     * @return bool
      */
     public function process(course_enrolment_manager $manager, array $users, stdClass $properties) {
         global $DB, $USER;
@@ -88,9 +88,9 @@ class enrol_token_editselectedusers_operation extends enrol_bulk_enrolment_opera
         $timestart = $properties->timestart;
         $timeend = $properties->timeend;
 
-        list($ueidsql, $params) = $DB->get_in_or_equal($ueids, SQL_PARAMS_NAMED);
+        [$ueidsql, $params] = $DB->get_in_or_equal($ueids, SQL_PARAMS_NAMED);
 
-        $updatesql = array();
+        $updatesql = [];
         if ($status == ENROL_USER_ACTIVE || $status == ENROL_USER_SUSPENDED) {
             $updatesql[] = 'status = :status';
             $params['status'] = (int)$status;

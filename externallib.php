@@ -28,7 +28,6 @@ use core_external\external_warnings;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class enrol_token_external extends external_api {
-
     /**
      * Returns description of get_instance_info() parameters.
      *
@@ -122,12 +121,14 @@ class enrol_token_external extends external_api {
 
         require_once($CFG->libdir . '/enrollib.php');
 
-        $params = self::validate_parameters(self::enrol_user_parameters(),
-                                            [
-                                                'courseid' => $courseid,
-                                                'token' => $token,
-                                                'instanceid' => $instanceid,
-                                            ]);
+        $params = self::validate_parameters(
+            self::enrol_user_parameters(),
+            [
+                'courseid' => $courseid,
+                'token' => $token,
+                'instanceid' => $instanceid,
+            ]
+        );
 
         $warnings = [];
 
@@ -158,7 +159,6 @@ class enrol_token_external extends external_api {
                 } else {
                     $instances[] = $courseenrolinstance;
                 }
-
             }
         }
 
@@ -171,7 +171,6 @@ class enrol_token_external extends external_api {
         foreach ($instances as $instance) {
             $enrolstatus = $enrol->can_self_enrol($instance);
             if ($enrolstatus === true) {
-
                 $conditions = [
                     'enrolid' => $instance->id,
                     'token' => $params['token'],

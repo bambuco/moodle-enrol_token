@@ -22,9 +22,12 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-defined('MOODLE_INTERNAL') || die();
-
+/**
+ * Upgrade the token enrolment plugin.
+ *
+ * @param int $oldversion The old version of the plugin.
+ * @return bool
+ */
 function xmldb_enrol_token_upgrade($oldversion) {
-
     return true;
 }

@@ -25,11 +25,11 @@
 /**
  * Token enrolment plugin implementation.
  *
+ * @package    enrol_token
  * @copyright  2024 David Herney @ BambuCo
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class enrol_token_plugin extends enrol_plugin {
-
     /**
      * Last user who is responsible for token enrolments in given instance.
      * @var stdClass
@@ -70,13 +70,13 @@ class enrol_token_plugin extends enrol_plugin {
         global $DB;
 
         if (empty($instance->name)) {
-            if (!empty($instance->roleid) and $role = $DB->get_record('role', ['id' => $instance->roleid])) {
+            if (!empty($instance->roleid) && $role = $DB->get_record('role', ['id' => $instance->roleid])) {
                 $role = ' (' . role_get_name($role, context_course::instance($instance->courseid, IGNORE_MISSING)) . ')';
             } else {
                 $role = '';
             }
             $enrol = $this->get_name();
-            return get_string('pluginname', 'enrol_'.$enrol) . $role;
+            return get_string('pluginname', 'enrol_' . $enrol) . $role;
         } else {
             return format_string($instance->name);
         }
@@ -84,6 +84,7 @@ class enrol_token_plugin extends enrol_plugin {
 
     /**
      * Does this plugin assign protected roles are can they be manually removed?
+     *
      * @return bool - false means anybody may tweak roles, it does not use itemid and component when assigning roles
      */
     public function roles_protected() {
@@ -95,7 +96,7 @@ class enrol_token_plugin extends enrol_plugin {
      * Does this plugin allow manual unenrolment of all users?
      *
      * @param stdClass $instance course enrol instance
-     * @return bool - true means user with 'enrol/xxx:unenrol' may unenrol others freely, false means nobody may touch user_enrolments
+     * @return bool - true means user with 'enrol/xxx:unenrol' may unenrol others freely, false means nobody may touch enrolments
      */
     public function allow_unenrol(stdClass $instance) {
         // Users with unenrol cap may unenrol other users manually manually.
@@ -120,7 +121,6 @@ class enrol_token_plugin extends enrol_plugin {
      * @return bool - true means show "Enrol me in this course" link in course UI
      */
     public function show_enrolme_link(stdClass $instance) {
-
         if (true !== $this->can_self_enrol($instance, false)) {
             return false;
         }
@@ -137,7 +137,7 @@ class enrol_token_plugin extends enrol_plugin {
     public function can_add_instance($courseid) {
         $context = context_course::instance($courseid, MUST_EXIST);
 
-        if (!has_capability('moodle/course:enrolconfig', $context) or !has_capability('enrol/token:config', $context)) {
+        if (!has_capability('moodle/course:enrolconfig', $context) || !has_capability('enrol/token:config', $context)) {
             return false;
         }
 
@@ -181,10 +181,15 @@ class enrol_token_plugin extends enrol_plugin {
 
         if (!empty($instance->customint1)) {
             require_once($CFG->dirroot . '/group/lib.php');
-            if ($DB->record_exists('groups', [
-                'id' => $instance->customint1,
-                'courseid' => $instance->courseid,
-            ])) {
+            if (
+                $DB->record_exists(
+                    'groups',
+                    [
+                        'id' => $instance->customint1,
+                        'courseid' => $instance->courseid,
+                    ]
+                )
+            ) {
                 groups_add_member($instance->customint1, $USER->id);
             }
         }
@@ -299,11 +304,11 @@ class enrol_token_plugin extends enrol_plugin {
             return get_string('canntenrol', 'enrol_token');
         }
 
-        if ($instance->enrolstartdate != 0 and $instance->enrolstartdate > time()) {
+        if ($instance->enrolstartdate != 0 && $instance->enrolstartdate > time()) {
             return get_string('canntenrolearly', 'enrol_token', userdate($instance->enrolstartdate));
         }
 
-        if ($instance->enrolenddate != 0 and $instance->enrolenddate < time()) {
+        if ($instance->enrolenddate != 0 && $instance->enrolenddate < time()) {
             return get_string('canntenrollate', 'enrol_token', userdate($instance->enrolenddate));
         }
 
@@ -348,7 +353,6 @@ class enrol_token_plugin extends enrol_plugin {
      * @return stdClass instance info.
      */
     public function get_enrol_info(stdClass $instance) {
-
         $instanceinfo = new stdClass();
         $instanceinfo->id = $instance->id;
         $instanceinfo->courseid = $instance->courseid;
@@ -507,7 +511,7 @@ class enrol_token_plugin extends enrol_plugin {
         }
 
         // Note: the logic of token enrolment guarantees that user logged in at least once (=== u.lastaccess set)
-        //       and that user accessed course at least once too (=== user_lastaccess record exists).
+        // and that user accessed course at least once too (=== user_lastaccess record exists).
 
         // First deal with users that did not log in for a really long time - they do not have user_lastaccess records.
         $sql = "SELECT e.*, ue.userid
@@ -566,7 +570,7 @@ class enrol_token_plugin extends enrol_plugin {
     protected function get_enroller($instanceid) {
         global $DB;
 
-        if ($this->lastenrollerinstanceid == $instanceid and $this->lastenroller) {
+        if ($this->lastenrollerinstanceid == $instanceid && $this->lastenroller) {
             return $this->lastenroller;
         }
 
@@ -593,6 +597,7 @@ class enrol_token_plugin extends enrol_plugin {
      * @param stdClass $data
      * @param stdClass $course
      * @param int $oldid
+     * @return void
      */
     public function restore_instance(restore_enrolments_structure_step $step, stdClass $data, $course, $oldid) {
         global $DB;
@@ -611,9 +616,7 @@ class enrol_token_plugin extends enrol_plugin {
             $instanceid = $instance->id;
         } else {
             if (!empty($data->customint5)) {
-                if ($step->get_task()->is_samesite()) {
-                    // Keep cohort restriction unchanged - we are on the same site.
-                } else {
+                if (!$step->get_task()->is_samesite()) {
                     // Use some id that can not exist in order to prevent token enrolment,
                     // because we do not know what cohort it is in this site.
                     $data->customint5 = -1;
@@ -630,8 +633,9 @@ class enrol_token_plugin extends enrol_plugin {
      * @param restore_enrolments_structure_step $step
      * @param stdClass $data
      * @param stdClass $instance
-     * @param int $oldinstancestatus
      * @param int $userid
+     * @param int $oldinstancestatus
+     * @return void
      */
     public function restore_user_enrolment(restore_enrolments_structure_step $step, $data, $instance, $userid, $oldinstancestatus) {
         $this->enrol_user($instance, $userid, null, $data->timestart, $data->timeend, $data->status);
@@ -644,6 +648,7 @@ class enrol_token_plugin extends enrol_plugin {
      * @param int $roleid
      * @param int $userid
      * @param int $contextid
+     * @return void
      */
     public function restore_role_assignment($instance, $roleid, $userid, $contextid) {
         // This is necessary only because we may migrate other types to this instance,
@@ -755,12 +760,13 @@ class enrol_token_plugin extends enrol_plugin {
 
     /**
      * The token enrollment plugin has several bulk operations that can be performed.
+     *
      * @param course_enrolment_manager $manager
      * @return array
      */
     public function get_bulk_operations(course_enrolment_manager $manager) {
         global $CFG;
-        require_once($CFG->dirroot.'/enrol/token/locallib.php');
+        require_once($CFG->dirroot . '/enrol/token/locallib.php');
         $context = $manager->get_context();
         $bulkoperations = [];
         if (has_capability("enrol/token:manage", $context)) {
@@ -778,7 +784,7 @@ class enrol_token_plugin extends enrol_plugin {
      * @param stdClass $instance
      * @param MoodleQuickForm $mform
      * @param context $context
-     * @return bool
+     * @return void
      */
     public function edit_instance_form($instance, MoodleQuickForm $mform, $context) {
         global $CFG, $DB;
@@ -847,15 +853,17 @@ class enrol_token_plugin extends enrol_plugin {
         $mform->addHelpButton('customint3', 'maxenrolled', 'enrol_token');
         $mform->setType('customint3', PARAM_INT);
 
-        require_once($CFG->dirroot.'/cohort/lib.php');
+        require_once($CFG->dirroot . '/cohort/lib.php');
 
         $cohorts = [0 => get_string('no')];
         $allcohorts = cohort_get_available_cohorts($context, 0, 0, 0);
         if ($instance->customint5 && !isset($allcohorts[$instance->customint5])) {
-            $c = $DB->get_record('cohort',
-                                 ['id' => $instance->customint5],
-                                 'id, name, idnumber, contextid, visible',
-                                 IGNORE_MISSING);
+            $c = $DB->get_record(
+                'cohort',
+                ['id' => $instance->customint5],
+                'id, name, idnumber, contextid, visible',
+                IGNORE_MISSING
+            );
             if ($c) {
                 // Current cohort was not found because current user can not see it. Still keep it.
                 $allcohorts[$instance->customint5] = $c;
@@ -864,7 +872,7 @@ class enrol_token_plugin extends enrol_plugin {
         foreach ($allcohorts as $c) {
             $cohorts[$c->id] = format_string($c->name, true, ['context' => context::instance_by_id($c->contextid)]);
             if ($c->idnumber) {
-                $cohorts[$c->id] .= ' ['.s($c->idnumber).']';
+                $cohorts[$c->id] .= ' [' . s($c->idnumber) . ']';
             }
         }
         if ($instance->customint5 && !isset($allcohorts[$instance->customint5])) {
@@ -880,8 +888,12 @@ class enrol_token_plugin extends enrol_plugin {
             $mform->setConstant('customint5', 0);
         }
 
-        $mform->addElement('select', 'customint4', get_string('sendcoursewelcomemessage', 'enrol_token'),
-                enrol_send_welcome_email_options());
+        $mform->addElement(
+            'select',
+            'customint4',
+            get_string('sendcoursewelcomemessage', 'enrol_token'),
+            enrol_send_welcome_email_options()
+        );
         $mform->addHelpButton('customint4', 'sendcoursewelcomemessage', 'enrol_token');
 
         $options = ['cols' => '60', 'rows' => '8'];
@@ -912,7 +924,6 @@ class enrol_token_plugin extends enrol_plugin {
      * @param context $context The context of the instance we are editing
      * @return array of "element_name"=>"error_description" if there are errors,
      *         or an empty array if everything is OK.
-     * @return void
      */
     public function edit_instance_validation($data, $files, $instance, $context) {
         global $CFG;
@@ -921,12 +932,12 @@ class enrol_token_plugin extends enrol_plugin {
         $errors = [];
 
         if ($data['status'] == ENROL_INSTANCE_ENABLED) {
-            if (!empty($data['enrolenddate']) and $data['enrolenddate'] < $data['enrolstartdate']) {
+            if (!empty($data['enrolenddate']) && $data['enrolenddate'] < $data['enrolstartdate']) {
                 $errors['enrolenddate'] = get_string('enrolenddaterror', 'enrol_token');
             }
         }
 
-        if ($data['expirynotify'] > 0 and $data['expirythreshold'] < 86400) {
+        if ($data['expirynotify'] > 0 && $data['expirythreshold'] < 86400) {
             $errors['expirythreshold'] = get_string('errorthresholdlow', 'core_enrol');
         }
 
@@ -955,7 +966,7 @@ class enrol_token_plugin extends enrol_plugin {
             'status' => $validstatus,
             'enrolperiod' => PARAM_INT,
             'expirynotify' => $validexpirynotify,
-            'roleid' => $validroles
+            'roleid' => $validroles,
         ];
         if ($data['expirynotify'] != 0) {
             $tovalidate['expirythreshold'] = PARAM_INT;
@@ -968,6 +979,7 @@ class enrol_token_plugin extends enrol_plugin {
 
     /**
      * Add new instance of enrol plugin.
+     *
      * @param object $course
      * @param array $fields instance fields
      * @return int id of new instance, null if can not be created
@@ -988,6 +1000,7 @@ class enrol_token_plugin extends enrol_plugin {
 
     /**
      * Update instance of enrol plugin.
+     *
      * @param stdClass $instance
      * @param stdClass $data modified instance fields
      * @return boolean
@@ -1035,7 +1048,7 @@ class enrol_token_plugin extends enrol_plugin {
      * Get the "from" contact which the email will be sent from.
      *
      * @param int $sendoption send email from constant ENROL_SEND_EMAIL_FROM_*
-     * @param $context context where the user will be fetched
+     * @param context $context context where the user will be fetched
      * @return mixed|stdClass the contact user object.
      */
     public function get_welcome_email_contact($sendoption, $context) {
@@ -1047,14 +1060,14 @@ class enrol_token_plugin extends enrol_plugin {
             $rusers = [];
             if (!empty($CFG->coursecontact)) {
                 $croles = explode(',', $CFG->coursecontact);
-                list($sort, $sortparams) = users_order_by_sql('u');
+                [$sort, $sortparams] = users_order_by_sql('u');
                 // We only use the first user.
                 $i = 0;
                 do {
                     $userfieldsapi = \core_user\fields::for_name();
                     $allnames = $userfieldsapi->get_sql('u', false, '', '', false)->selects;
-                    $rusers = get_role_users($croles[$i], $context, true, 'u.id,  u.confirmed, u.username, '. $allnames . ',
-                    u.email, r.sortorder, ra.id', 'r.sortorder, ra.id ASC, ' . $sort, null, '', '', '', '', $sortparams);
+                    $rusers = get_role_users($croles[$i], $context, true, 'u.id,  u.confirmed, u.username, ' . $allnames .
+                    ', u.email, r.sortorder, ra.id', 'r.sortorder, ra.id ASC, ' . $sort, null, '', '', '', '', $sortparams);
                     $i++;
                 } while (empty($rusers) && !empty($croles[$i]));
             }
@@ -1063,7 +1076,7 @@ class enrol_token_plugin extends enrol_plugin {
             }
         } else if ($sendoption == ENROL_SEND_EMAIL_FROM_KEY_HOLDER) {
             // Send as the first user with enrol/token:holdkey capability assigned in the course.
-            list($sort) = users_order_by_sql('u');
+            [$sort] = users_order_by_sql('u');
             $keyholders = get_users_by_capability($context, 'enrol/token:holdkey', 'u.*', $sort);
             if (!empty($keyholders)) {
                 $contact = array_values($keyholders)[0];
@@ -1118,6 +1131,8 @@ class enrol_token_plugin extends enrol_plugin {
 
 /**
  * Get icon mapping for font-awesome.
+ *
+ * @return array
  */
 function enrol_token_get_fontawesome_icon_map() {
     return [

@@ -81,8 +81,14 @@ echo $OUTPUT->header();
 echo $OUTPUT->heading($title);
 
 // List the tokens.
-$report = system_report_factory::create(\enrol_token\systemreports\tokens::class,
-                                            $context, '', '', 0, ['enrolid' => $instance->id]);
+$report = system_report_factory::create(
+    \enrol_token\systemreports\tokens::class,
+    $context,
+    '',
+    '',
+    0,
+    ['enrolid' => $instance->id]
+);
 
 echo $report->output();
 

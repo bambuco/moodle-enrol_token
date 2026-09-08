@@ -28,14 +28,13 @@ require_once($CFG->libdir . '/formslib.php');
 require_once($CFG->dirroot . '/enrol/locallib.php');
 
 /**
- * Token enrolment plugin class.
+ * Token enrolment form.
  *
  * @package    enrol_token
  * @copyright  2024 David Herney @ BambuCo
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class enrol_token_enrol_form extends moodleform {
-
     /**
      * @var stdClass The enrol instance.
      */
@@ -59,6 +58,7 @@ class enrol_token_enrol_form extends moodleform {
     /**
      * Form definition.
      *
+     * @return void
      */
     public function definition() {
         global $USER, $OUTPUT, $CFG;
@@ -72,8 +72,12 @@ class enrol_token_enrol_form extends moodleform {
         $mform->addElement('header', 'tokenheader', $heading);
 
         // Change the id of token enrolment key input as there can be multiple token enrolment methods.
-        $mform->addElement('text', 'enroltoken', get_string('token', 'enrol_token'),
-                ['id' => 'enroltoken_'.$instance->id]);
+        $mform->addElement(
+            'text',
+            'enroltoken',
+            get_string('token', 'enrol_token'),
+            ['id' => 'enroltoken_' . $instance->id]
+        );
         $mform->setType('enroltoken', PARAM_TEXT);
         $context = context_course::instance($this->instance->courseid);
         $userfieldsapi = \core_user\fields::for_userpic();
@@ -86,15 +90,18 @@ class enrol_token_enrol_form extends moodleform {
                 $mform->addElement('static', 'keyholder', '', get_string('keyholder', 'enrol_token'));
             }
 
-            if ($USER->id == $keyholder->id || has_capability('moodle/user:viewdetails', context_system::instance()) ||
-                    has_coursecontact_role($keyholder->id)) {
+            if (
+                $USER->id == $keyholder->id
+                || has_capability('moodle/user:viewdetails', context_system::instance())
+                || has_coursecontact_role($keyholder->id)
+            ) {
                 $profilelink = '<a href="' . $CFG->wwwroot . '/user/view.php?id=' . $keyholder->id . '&amp;course=' .
                 $this->instance->courseid . '">' . fullname($keyholder) . '</a>';
             } else {
                 $profilelink = fullname($keyholder);
             }
-            $profilepic = $OUTPUT->user_picture($keyholder, array('size' => 35, 'courseid' => $this->instance->courseid));
-            $mform->addElement('static', 'keyholder'.$keyholdercount, '', $profilepic . $profilelink);
+            $profilepic = $OUTPUT->user_picture($keyholder, ['size' => 35, 'courseid' => $this->instance->courseid]);
+            $mform->addElement('static', 'keyholder' . $keyholdercount, '', $profilepic . $profilelink);
         }
 
         $this->add_action_buttons(false, get_string('enrolme', 'enrol_token'));
@@ -127,10 +134,10 @@ class enrol_token_enrol_form extends moodleform {
         }
 
         $conditions = [
-                        'enrolid' => $instance->id,
-                        'token' => $data['enroltoken'],
-                        'timeused' => 0,
-                    ];
+            'enrolid' => $instance->id,
+            'token' => $data['enroltoken'],
+            'timeused' => 0,
+        ];
         $validtoken = $DB->count_records('enrol_token_tokens', $conditions);
         if ($validtoken < 1) {
             $errors['enroltoken'] = get_string('tokeninvalid', 'enrol_token');

@@ -24,8 +24,6 @@
 
 namespace enrol_token\task;
 
-defined('MOODLE_INTERNAL') || die();
-
 /**
  * Sync enrolments task.
  *
@@ -34,7 +32,6 @@ defined('MOODLE_INTERNAL') || die();
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class sync_enrolments extends \core\task\scheduled_task {
-
     /**
      * Name for this task.
      *
@@ -46,11 +43,12 @@ class sync_enrolments extends \core\task\scheduled_task {
 
     /**
      * Run task for syncing enrolments.
+     *
+     * @return void
      */
     public function execute() {
         $enrol = enrol_get_plugin('token');
         $trace = new \text_progress_trace();
         $enrol->sync($trace);
     }
-
 }

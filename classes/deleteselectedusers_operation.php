@@ -22,8 +22,6 @@
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-defined('MOODLE_INTERNAL') || die();
-
 /**
  * A bulk operation for the token enrolment plugin to delete selected users enrolments.
  *
@@ -32,9 +30,9 @@ defined('MOODLE_INTERNAL') || die();
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class enrol_token_deleteselectedusers_operation extends enrol_bulk_enrolment_operation {
-
     /**
-     * Returns the title to display for this bulk operation.
+     * Returns the identifier for this bulk operation. This is the key used when the plugin
+     * returns an array containing all of the bulk operations it supports.
      *
      * @return string
      */
@@ -43,8 +41,7 @@ class enrol_token_deleteselectedusers_operation extends enrol_bulk_enrolment_ope
     }
 
     /**
-     * Returns the identifier for this bulk operation. This is the key used when the plugin
-     * returns an array containing all of the bulk operations it supports.
+     * Returns the title to display for this bulk operation.
      *
      * @return string
      */
@@ -61,7 +58,7 @@ class enrol_token_deleteselectedusers_operation extends enrol_bulk_enrolment_ope
      * @return enrol_token_deleteselectedusers_form
      */
     public function get_form($defaultaction = null, $defaultcustomdata = null) {
-        if (!array($defaultcustomdata)) {
+        if (!is_array($defaultcustomdata)) {
             $defaultcustomdata = [];
         }
         $defaultcustomdata['title'] = $this->get_title();
@@ -77,6 +74,7 @@ class enrol_token_deleteselectedusers_operation extends enrol_bulk_enrolment_ope
      * @param course_enrolment_manager $manager
      * @param array $users
      * @param stdClass $properties The data returned by the form.
+     * @return bool
      */
     public function process(course_enrolment_manager $manager, array $users, stdClass $properties) {
         if (!has_capability("enrol/token:unenrol", $manager->get_context())) {

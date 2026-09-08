@@ -21,9 +21,11 @@
  * @copyright  2024 David Herney @ BambuCo
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-defined('MOODLE_INTERNAL') || die();
 
+/**
+ * Performs installation steps for the token enrolment plugin.
+ *
+ * @return void
+ */
 function xmldb_enrol_token_install() {
-    global $CFG, $DB;
-
 }

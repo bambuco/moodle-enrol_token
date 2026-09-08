@@ -26,13 +26,13 @@ namespace enrol_token\output;
 use plugin_renderer_base;
 
 /**
- * Vitrina block renderer
+ * Renderer for the token enrolment plugin.
  *
+ * @package    enrol_token
  * @copyright  2024 David Herney @ BambuCo
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class renderer extends plugin_renderer_base {
-
     /**
      * Return the template content for generate tokens.
      *
@@ -42,5 +42,4 @@ class renderer extends plugin_renderer_base {
     public function render_catalog(generatetokens $generatetokens): string {
         return $this->render_from_template('enrol_token/generatetokens', $generatetokens->export_for_template($this));
     }
-
 }

@@ -28,13 +28,13 @@ use renderer_base;
 use templatable;
 
 /**
- * Class containing form for generate tokens.
+ * Renderable for the generate tokens form.
  *
+ * @package    enrol_token
  * @copyright  2024 David Herney @ BambuCo
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class generatetokens implements renderable, templatable {
-
     /**
      * @var object Enrol.
      */
@@ -46,7 +46,6 @@ class generatetokens implements renderable, templatable {
      * @param object $enrol Current enrol instance
      */
     public function __construct($enrol) {
-
         $this->enrol = $enrol;
     }
 

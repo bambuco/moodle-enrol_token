@@ -26,12 +26,19 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-require_once($CFG->libdir.'/formslib.php');
+require_once($CFG->libdir . '/formslib.php');
 
+/**
+ * Empty enrol_token form.
+ *
+ * @package    enrol_token
+ * @copyright  2024 David Herney @ BambuCo
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
 class enrol_token_empty_form extends moodleform {
-
     /**
      * Form definition.
+     *
      * @return void
      */
     public function definition() {

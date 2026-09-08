@@ -30,11 +30,11 @@
 
 define('CLI_SCRIPT', true);
 
-require(__DIR__.'/../../../config.php');
+require(__DIR__ . '/../../../config.php');
 require_once("$CFG->libdir/clilib.php");
 
 // Now get cli options.
-list($options, $unrecognized) = cli_get_params(['verbose' => false, 'help' => false], ['v' => 'verbose', 'h' => 'help']);
+[$options, $unrecognized] = cli_get_params(['verbose' => false, 'help' => false], ['v' => 'verbose', 'h' => 'help']);
 
 if ($unrecognized) {
     $unrecognized = implode("\n  ", $unrecognized);
@@ -67,7 +67,7 @@ if (empty($options['verbose'])) {
     $trace = new text_progress_trace();
 }
 
-/** @var $plugin enrol_token_plugin */
+// Get the plugin instance.
 $plugin = enrol_get_plugin('token');
 
 $result = $plugin->sync($trace, null);

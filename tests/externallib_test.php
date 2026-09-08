@@ -14,6 +14,14 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
+/**
+ * Token enrolment external functions tests.
+ *
+ * @package    enrol_token
+ * @copyright  2024 David Herney @ BambuCo
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+
 namespace enrol_token;
 
 use core_external\external_api;
@@ -35,7 +43,11 @@ require_once($CFG->dirroot . '/enrol/token/externallib.php');
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 final class externallib_test extends externallib_advanced_testcase {
-
+    /**
+     * Enable the token enrolment plugin.
+     *
+     * @return void
+     */
     protected function enable_plugin() {
         $enabled = enrol_get_plugins(true);
         $enabled['token'] = true;
@@ -43,6 +55,11 @@ final class externallib_test extends externallib_advanced_testcase {
         set_config('enrol_plugins_enabled', implode(',', $enabled));
     }
 
+    /**
+     * Disable the token enrolment plugin.
+     *
+     * @return void
+     */
     protected function disable_plugin() {
         $enabled = enrol_get_plugins(true);
         unset($enabled['token']);
@@ -51,9 +68,11 @@ final class externallib_test extends externallib_advanced_testcase {
     }
 
     /**
-     * Test get_instance_info
+     * Test get_instance_info.
+     *
+     * @covers \enrol_token_external::get_instance_info
      */
-    public function test_get_instance_info() {
+    public function test_get_instance_info(): void {
         global $DB;
 
         $this->resetAfterTest(true);
@@ -62,7 +81,7 @@ final class externallib_test extends externallib_advanced_testcase {
         $tokenplugin = enrol_get_plugin('token');
         $this->assertNotEmpty($tokenplugin);
 
-        $studentrole = $DB->get_record('role', array('shortname'=>'student'));
+        $studentrole = $DB->get_record('role', ['shortname' => 'student']);
         $this->assertNotEmpty($studentrole);
 
         $coursedata = new \stdClass();
@@ -70,21 +89,27 @@ final class externallib_test extends externallib_advanced_testcase {
         $course = self::getDataGenerator()->create_course($coursedata);
 
         // Add enrolment methods for course.
-        $instanceid1 = $tokenplugin->add_instance($course, array('status' => ENROL_INSTANCE_ENABLED,
-                                                                'name' => 'Test instance 1',
-                                                                'customint6' => 1,
-                                                                'roleid' => $studentrole->id));
-        $instanceid2 = $tokenplugin->add_instance($course, array('status' => ENROL_INSTANCE_DISABLED,
-                                                                'customint6' => 1,
-                                                                'name' => 'Test instance 2',
-                                                                'roleid' => $studentrole->id));
+        $instanceid1 = $tokenplugin->add_instance($course, [
+            'status' => ENROL_INSTANCE_ENABLED,
+            'name' => 'Test instance 1',
+            'customint6' => 1,
+            'roleid' => $studentrole->id,
+        ]);
+        $instanceid2 = $tokenplugin->add_instance($course, [
+            'status' => ENROL_INSTANCE_DISABLED,
+            'customint6' => 1,
+            'name' => 'Test instance 2',
+            'roleid' => $studentrole->id,
+        ]);
 
-        $instanceid3 = $tokenplugin->add_instance($course, array('status' => ENROL_INSTANCE_ENABLED,
-                                                                'roleid' => $studentrole->id,
-                                                                'customint6' => 1,
-                                                                'name' => 'Test instance 3',));
+        $instanceid3 = $tokenplugin->add_instance($course, [
+            'status' => ENROL_INSTANCE_ENABLED,
+            'roleid' => $studentrole->id,
+            'customint6' => 1,
+            'name' => 'Test instance 3',
+        ]);
 
-        $enrolmentmethods = $DB->get_records('enrol', array('courseid' => $course->id, 'status' => ENROL_INSTANCE_ENABLED));
+        $enrolmentmethods = $DB->get_records('enrol', ['courseid' => $course->id, 'status' => ENROL_INSTANCE_ENABLED]);
         $this->assertCount(3, $enrolmentmethods);
 
         $this->setAdminUser();
@@ -124,9 +149,11 @@ final class externallib_test extends externallib_advanced_testcase {
     }
 
     /**
-     * Test enrol_user
+     * Test enrol_user.
+     *
+     * @covers \enrol_token_external::enrol_user
      */
-    public function test_enrol_user() {
+    public function test_enrol_user(): void {
         global $DB;
 
         self::resetAfterTest(true);
@@ -136,7 +163,7 @@ final class externallib_test extends externallib_advanced_testcase {
         self::setUser($user);
 
         $course1 = self::getDataGenerator()->create_course();
-        $course2 = self::getDataGenerator()->create_course(array('groupmode' => SEPARATEGROUPS, 'groupmodeforce' => 1));
+        $course2 = self::getDataGenerator()->create_course(['groupmode' => SEPARATEGROUPS, 'groupmodeforce' => 1]);
         $user1 = self::getDataGenerator()->create_user();
         $user2 = self::getDataGenerator()->create_user();
         $user3 = self::getDataGenerator()->create_user();
@@ -146,17 +173,21 @@ final class externallib_test extends externallib_advanced_testcase {
         $context2 = \context_course::instance($course2->id);
 
         $tokenplugin = enrol_get_plugin('token');
-        $studentrole = $DB->get_record('role', array('shortname' => 'student'));
-        $instance1id = $tokenplugin->add_instance($course1, array('status' => ENROL_INSTANCE_ENABLED,
-                                                                'name' => 'Test instance 1',
-                                                                'customint6' => 1,
-                                                                'roleid' => $studentrole->id));
-        $instance2id = $tokenplugin->add_instance($course2, array('status' => ENROL_INSTANCE_DISABLED,
-                                                                'customint6' => 1,
-                                                                'name' => 'Test instance 2',
-                                                                'roleid' => $studentrole->id));
-        $instance1 = $DB->get_record('enrol', array('id' => $instance1id), '*', MUST_EXIST);
-        $instance2 = $DB->get_record('enrol', array('id' => $instance2id), '*', MUST_EXIST);
+        $studentrole = $DB->get_record('role', ['shortname' => 'student']);
+        $instance1id = $tokenplugin->add_instance($course1, [
+            'status' => ENROL_INSTANCE_ENABLED,
+            'name' => 'Test instance 1',
+            'customint6' => 1,
+            'roleid' => $studentrole->id,
+        ]);
+        $instance2id = $tokenplugin->add_instance($course2, [
+            'status' => ENROL_INSTANCE_DISABLED,
+            'customint6' => 1,
+            'name' => 'Test instance 2',
+            'roleid' => $studentrole->id,
+        ]);
+        $instance1 = $DB->get_record('enrol', ['id' => $instance1id], '*', MUST_EXIST);
+        $instance2 = $DB->get_record('enrol', ['id' => $instance2id], '*', MUST_EXIST);
 
         self::setUser($user1);
 
@@ -172,7 +203,7 @@ final class externallib_test extends externallib_advanced_testcase {
         $result = external_api::clean_returnvalue(enrol_token_external::enrol_user_returns(), $result);
 
         self::assertTrue($result['status']);
-        self::assertEquals(1, $DB->count_records('user_enrolments', array('enrolid' => $instance1->id)));
+        self::assertEquals(1, $DB->count_records('user_enrolments', ['enrolid' => $instance1->id]));
         self::assertTrue(is_enrolled($context1, $user1));
 
         // Try instance not enabled.
@@ -207,15 +238,17 @@ final class externallib_test extends externallib_advanced_testcase {
         $result = external_api::clean_returnvalue(enrol_token_external::enrol_user_returns(), $result);
 
         self::assertTrue($result['status']);
-        self::assertEquals(1, $DB->count_records('user_enrolments', array('enrolid' => $instance2->id)));
+        self::assertEquals(1, $DB->count_records('user_enrolments', ['enrolid' => $instance2->id]));
         self::assertTrue(is_enrolled($context2, $user1));
 
         // Try multiple instances now, multiple errors.
-        $instance3id = $tokenplugin->add_instance($course2, array('status' => ENROL_INSTANCE_ENABLED,
-                                                                'customint6' => 1,
-                                                                'name' => 'Test instance 2',
-                                                                'roleid' => $studentrole->id));
-        $instance3 = $DB->get_record('enrol', array('id' => $instance3id), '*', MUST_EXIST);
+        $instance3id = $tokenplugin->add_instance($course2, [
+            'status' => ENROL_INSTANCE_ENABLED,
+            'customint6' => 1,
+            'name' => 'Test instance 2',
+            'roleid' => $studentrole->id,
+        ]);
+        $instance3 = $DB->get_record('enrol', ['id' => $instance3id], '*', MUST_EXIST);
         // Generate tokens.
         $tokens3 = $tokenplugin->generate_tokens($instance3, 1);
 
@@ -247,7 +280,7 @@ final class externallib_test extends externallib_advanced_testcase {
         self::assertTrue($result['status']);
         self::assertTrue(is_enrolled($context2, $user3));
         self::assertCount(0, $result['warnings']);
-        self::assertEquals(1, $DB->count_records('user_enrolments', array('enrolid' => $instance3->id)));
+        self::assertEquals(1, $DB->count_records('user_enrolments', ['enrolid' => $instance3->id]));
 
         // Not tokens available.
         self::assertEquals(0, $DB->count_records('enrol_token_tokens', ['enrolid' => $instance3->id, 'timeused' => 0]));

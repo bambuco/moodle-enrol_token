@@ -29,3 +29,4 @@ $plugin->requires  = 2023100400;
 $plugin->component = 'enrol_token';
 $plugin->maturity  = MATURITY_STABLE;
 $plugin->release   = 'v1.0.1';
+$plugin->supported = [405, 501];
